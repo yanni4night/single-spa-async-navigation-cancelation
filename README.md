@@ -1,4 +1,4 @@
-# spa-test
+# single-spa-async-navigation-cancelation
 
 ## Project setup
 ```

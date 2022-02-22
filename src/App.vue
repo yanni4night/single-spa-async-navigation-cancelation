@@ -1,30 +1,96 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <div class="content">
+    <ul>
+      <li><a href="#" @click.prevent="toFoo">toFoo</a></li>
+      <li><a href="#" @click.prevent="toBar">toBar</a></li>
+      <li><a href="#" @click.prevent="toBaz">toBaz</a></li>
+    </ul>
+    <div class="root" ref="root"></div>
   </div>
-  <router-view/>
 </template>
 
-<style lang="less">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script lang="ts">
+import {
+  registerApplication,
+  start,
+  addErrorHandler,
+  setMountMaxTime,
+} from "single-spa";
 
-#nav {
-  padding: 30px;
+import { defineComponent } from "vue";
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+export default defineComponent({
+  async mounted() {
+    await this.$nextTick();
 
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
-</style>
+    const root = this.$refs.root;
+
+    setMountMaxTime(4000, true);
+
+    registerApplication(
+      "foo",
+      () => import("./foo/index"),
+      (location) => location.pathname.startsWith("/foo"),
+      {
+        domElement: root,
+      }
+    );
+
+    registerApplication({
+      name: "bar",
+      app: () => import("./bar/index"),
+      activeWhen: (location) => location.pathname.startsWith("/bar"),
+      customProps: {
+        domElement: root,
+      },
+    });
+
+    registerApplication({
+      name: "baz",
+      app: () => import("./baz/index"),
+      activeWhen: (location) => location.pathname.startsWith("/baz"),
+      customProps: {
+        domElement: root,
+      },
+    });
+
+    addErrorHandler((err) => {
+      console.error("SPA Error", err);
+    });
+    // @ts-ignore
+    window.addEventListener(
+      "single-spa:before-routing-event",
+      (evt: { detail: any }) => {
+        console.log(evt.detail);
+        if (evt.detail.newUrl.endsWith("/bar")) {
+          let t = 3000;
+          evt.detail.cancelNavigation(
+            new Promise((re) =>
+              setTimeout(() => {
+                console.log("do cancel", evt.detail.newUrl);
+                re(true);
+              }, t)
+            )
+          );
+        }
+      }
+    );
+
+    start();
+  },
+  methods: {
+    toFoo() {
+      console.log("toFoo");
+      history.pushState(null, "foo", "/foo");
+    },
+    toBar() {
+      console.log("toBar");
+      history.pushState(null, "bar", "/bar");
+    },
+    toBaz() {
+      console.log("toBaz");
+      history.pushState(null, "baz", "/baz");
+    },
+  },
+});
+</script>

@@ -1,5 +1,5 @@
 {
-  "name": "spa-test",
+  "name": "single-spa-async-navigation-cancelation",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "single-spa": "^6.0.0-beta.2",
+    "single-spa-vue": "^2.5.1",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0"
   },

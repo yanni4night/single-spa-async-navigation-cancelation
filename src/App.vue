@@ -61,8 +61,8 @@ export default defineComponent({
     window.addEventListener(
       "single-spa:before-routing-event",
       (evt: { detail: any }) => {
-        console.log(evt.detail);
-        if (evt.detail.newUrl.endsWith("/bar")) {
+        console.log(`${evt.detail.oldUrl}=>${evt.detail.newUrl}`);
+        if (evt.detail.newUrl.endsWith("/foo")) {
           let t = 3000;
           evt.detail.cancelNavigation(
             new Promise((re) =>
@@ -76,7 +76,13 @@ export default defineComponent({
       }
     );
 
+   
+
     start();
+
+     window.addEventListener('popstate', e => {
+      console.log('popstate', e);
+    })
   },
   methods: {
     toFoo() {
